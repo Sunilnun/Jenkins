@@ -1,0 +1,55 @@
+pipeline {
+    agent any 
+    tools {
+        maven 'MAVEN_PATH' // this name should match the name under tools section in jenkins
+    }
+    stages {
+        stage('Install Java 16') {
+            steps {
+                script {
+                    def javaVersion = '16'
+                    def downloadUrl = "https://download.java.net/java/GA/jdk${javaVersion}/latest/binaries/openjdk-${javaVersion}_linux-x64_bin.tar.gz"
+                    def installDir = "/usr/local/java/jdk-${javaVersion}"
+
+                    // Download Java
+                    sh """
+                    wget ${downloadUrl} -O jdk-${javaVersion}.tar.gz
+                    """
+
+                    // Create installation directory
+                    sh """
+                    sudo mkdir -p ${installDir}
+                    """
+
+                    // Extract Java
+                    sh """
+                    sudo tar -xzf jdk-${javaVersion}.tar.gz -C ${installDir} --strip-components=1
+                    """
+
+                    // Set environment variables
+                    sh """
+                    echo "export JAVA_HOME=${installDir}" | sudo tee -a /etc/profile
+                    echo "export PATH=\$JAVA_HOME/bin:\$PATH" | sudo tee -a /etc/profile
+                    source /etc/profile
+                    """
+                }
+            }
+        }
+        stage('Verify Java Installation') {
+            steps {
+                sh 'java -version'
+                sh 'javac -version'
+            }
+        }
+        stage ('SpecificStage') {
+            tools {
+                jdk 'JDK-17'
+            }
+            steps {
+                echo "****** Maven version with my custom java at /opt******"
+                sh "mvn --version"
+            }
+        }
+    }
+}
+
