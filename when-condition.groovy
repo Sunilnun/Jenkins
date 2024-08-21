@@ -53,3 +53,49 @@ pipeline{
         }
     }
 }
+//anyOf (hear O is capital letter) if we keep this any one condition 
+//should met while executing the when condition
+
+pipeline{
+    agent any
+    environment{
+        DEPLOY_TO = 'Production'
+    }
+    stages{
+        stage('any of stage'){
+            when{
+                anyOf{
+                    expression { BRANCH_NAME == ~ /(docker|kubernetes)/}
+                    environment name: 'DEPLOY_TO', value: 'Production'
+                  // hear it will get succed because environment is getting matched
+                }
+
+            }
+            steps{
+                echo 'when stage met all the cretatia'
+            }
+        }
+    }
+}
+
+//allOf (hear O is capital letter) if we keep this all conditions should meet
+pipeline{
+    agent any
+    environment{
+        DEPLOY_TO = 'Production'
+    }
+    stages{
+        stage('any of stage'){
+            when{
+                allOf{
+                    expression { BRANCH_NAME == ~ /(docker|kubernetes)/}
+                    environment name: 'DEPLOY_TO', value: 'Production'
+                  
+                }
+            }
+            steps{
+                echo 'when stage met all the cretatia'
+            }
+        }
+    }
+}
